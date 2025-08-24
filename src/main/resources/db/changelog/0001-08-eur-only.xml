@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+    http://www.liquibase.org/xml/ns/dbchangelog
+    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <!-- 1) Normalize existing data to EUR -->
+    <changeSet id="0001-08-a-upd-existing-eur" author="einsights">
+        <sql>
+            UPDATE products     SET currency = 'EUR' WHERE currency IS NULL OR currency &lt;&gt; 'EUR';
+            UPDATE orders       SET currency = 'EUR' WHERE currency IS NULL OR currency &lt;&gt; 'EUR';
+            UPDATE order_items  SET currency = 'EUR' WHERE currency IS NULL OR currency &lt;&gt; 'EUR';
+        </sql>
+    </changeSet>
+
+    <!-- 2) Ensure default value = EUR on all relevant tables -->
+    <changeSet id="0001-08-b-default-eur" author="einsights">
+        <addDefaultValue tableName="products"    columnName="currency" defaultValue="EUR"/>
+        <addDefaultValue tableName="orders"      columnName="currency" defaultValue="EUR"/>
+        <addDefaultValue tableName="order_items" columnName="currency" defaultValue="EUR"/>
+    </changeSet>
+
+    <!-- 3) Enforce EUR only with CHECK constraints, guarded by sqlCheck preconditions -->
+
+    <!-- products.currency -->
+    <changeSet id="0001-08-c-products-eur-check" author="einsights">
+        <preConditions onFail="MARK_RAN">
+            <!-- Run only if the constraint does NOT already exist -->
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)::text
+                FROM information_schema.table_constraints
+                WHERE table_schema = COALESCE(current_schema(), 'public')
+                AND table_name = 'products'
+                AND constraint_name = 'chk_products_currency_eur'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE products
+            ADD CONSTRAINT chk_products_currency_eur CHECK (currency = 'EUR');
+        </sql>
+    </changeSet>
+
+    <!-- orders.currency -->
+    <changeSet id="0001-08-d-orders-eur-check" author="einsights">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)::text
+                FROM information_schema.table_constraints
+                WHERE table_schema = COALESCE(current_schema(), 'public')
+                AND table_name = 'orders'
+                AND constraint_name = 'chk_orders_currency_eur'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE orders
+            ADD CONSTRAINT chk_orders_currency_eur CHECK (currency = 'EUR');
+        </sql>
+    </changeSet>
+
+    <!-- order_items.currency -->
+    <changeSet id="0001-08-e-order-items-eur-check" author="einsights">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)::text
+                FROM information_schema.table_constraints
+                WHERE table_schema = COALESCE(current_schema(), 'public')
+                AND table_name = 'order_items'
+                AND constraint_name = 'chk_oi_currency_eur'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE order_items
+            ADD CONSTRAINT chk_oi_currency_eur CHECK (currency = 'EUR');
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+    http://www.liquibase.org/xml/ns/dbchangelog
+    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <!-- Normalize all currency columns to VARCHAR(3) to match JPA expectations -->
+
+    <changeSet id="0001-07-a-orders-currency-varchar3" author="einsights">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="orders" columnName="currency"/>
+        </preConditions>
+        <modifyDataType tableName="orders" columnName="currency" newDataType="VARCHAR(3)"/>
+    </changeSet>
+
+    <changeSet id="0001-07-b-order-items-currency-varchar3" author="einsights">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="order_items" columnName="currency"/>
+        </preConditions>
+        <modifyDataType tableName="order_items" columnName="currency" newDataType="VARCHAR(3)"/>
+    </changeSet>
+
+    <changeSet id="0001-07-c-products-currency-varchar3" author="einsights">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="products" columnName="currency"/>
+        </preConditions>
+        <modifyDataType tableName="products" columnName="currency" newDataType="VARCHAR(3)"/>
+    </changeSet>
+
+</databaseChangeLog>

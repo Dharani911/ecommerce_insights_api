@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+      http://www.liquibase.org/xml/ns/dbchangelog
+      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <!-- Base schema you already created earlier -->
+    <include file="db/changelog/0001-init.xml" relativeToChangelogFile="false"/>
+
+    <!-- Stored functions with guards & helpful errors -->
+    <include file="db/changelog/0002-functions.sql" relativeToChangelogFile="false"/>
+
+    <!-- Hybrid piece: views (Sales by Day) -->
+    <include file="db/changelog/0003-views.sql" relativeToChangelogFile="false"/>
+    <include file="db/changelog/0004-sample-data.sql" relativeToChangelogFile="false"/>
+    <include file="db/changelog/0001-07-fix-currency-varchar.xml" relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/0001-08-eur-only.xml" relativeToChangelogFile="false"/>
+
+</databaseChangeLog>
