@@ -9,14 +9,14 @@ public class TopCustomerRow {
     private String nameOrEmail;
     private long orders;
     private BigDecimal revenue;
-    private String lastOrderDate; // yyyy-MM-dd
 
-    public TopCustomerRow(Long customerId, String nameOrEmail, long orders, BigDecimal revenue, String lastOrderDate) {
+
+    public TopCustomerRow(Long customerId, String nameOrEmail, long orders, BigDecimal revenue) {
         this.customerId = customerId;
         this.nameOrEmail = nameOrEmail;
         this.orders = orders;
         this.revenue = revenue;
-        this.lastOrderDate = lastOrderDate;
+
     }
 
     public TopCustomerRow() {
@@ -54,13 +54,6 @@ public class TopCustomerRow {
         this.revenue = revenue;
     }
 
-    public String getLastOrderDate() {
-        return lastOrderDate;
-    }
-
-    public void setLastOrderDate(String lastOrderDate) {
-        this.lastOrderDate = lastOrderDate;
-    }
 
     @Override
     public String toString() {
@@ -69,7 +62,6 @@ public class TopCustomerRow {
                 ", nameOrEmail='" + nameOrEmail + '\'' +
                 ", orders=" + orders +
                 ", revenue=" + revenue +
-                ", lastOrderDate='" + lastOrderDate + '\'' +
                 '}';
     }
 }

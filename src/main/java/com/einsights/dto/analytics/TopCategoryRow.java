@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 
 @Builder @Data
 public class TopCategoryRow {
-    private Long categoryId;
+
     private String name;
     private long units;
     private BigDecimal revenue;
@@ -13,20 +13,14 @@ public class TopCategoryRow {
     public TopCategoryRow() {
     }
 
-    public TopCategoryRow(Long categoryId, String name, long units, BigDecimal revenue) {
-        this.categoryId = categoryId;
+    public TopCategoryRow( String name, long units, BigDecimal revenue) {
+
         this.name = name;
         this.units = units;
         this.revenue = revenue;
     }
 
-    public Long getCategoryId() {
-        return categoryId;
-    }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
 
     public String getName() {
         return name;
@@ -55,7 +49,6 @@ public class TopCategoryRow {
     @Override
     public String toString() {
         return "TopCategoryRow{" +
-                "categoryId=" + categoryId +
                 ", name='" + name + '\'' +
                 ", units=" + units +
                 ", revenue=" + revenue +

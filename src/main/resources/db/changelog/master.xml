@@ -18,5 +18,6 @@
     <include file="db/changelog/0001-07-fix-currency-varchar.xml" relativeToChangelogFile="false"/>
 
     <include file="db/changelog/0001-08-eur-only.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/0001-09-fix-top-functions.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

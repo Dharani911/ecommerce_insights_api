@@ -31,3 +31,22 @@ build/
 
 ### VS Code ###
 .vscode/
+# Maven / Gradle
+/target/
+/build/
+
+# IDEs
+/.idea/
+/.vscode/
+/*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Credentials
+application.properties
+application.yml

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+    http://www.liquibase.org/xml/ns/dbchangelog
+    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!-- Ensure result columns exactly match your DTOs and service code -->
+
+    <changeSet id="0001-09-1-fn-top-products" author="dharani">
+        <sql splitStatements="false">
+            <![CDATA[
+        DROP FUNCTION IF EXISTS fn_top_products(date, date, integer);
+        CREATE OR REPLACE FUNCTION fn_top_products(
+          p_start DATE,
+          p_end   DATE,
+          p_limit INTEGER
+        )
+        RETURNS TABLE(
+          product_id BIGINT,
+          name       TEXT,
+          units      BIGINT,
+          revenue    NUMERIC
+        )
+        LANGUAGE sql
+        STABLE
+        AS $$
+          SELECT
+              p.id::bigint               AS product_id,
+              p.name::text               AS name,
+              SUM(oi.quantity)::bigint   AS units,
+              COALESCE(SUM(oi.line_total), 0)::numeric AS revenue
+          FROM order_items oi
+          JOIN orders o   ON o.id = oi.order_id
+          JOIN products p ON p.id = oi.product_id
+          WHERE o.order_date BETWEEN p_start AND p_end
+            AND o.status IN ('PAID')
+            AND oi.currency = 'EUR'
+          GROUP BY p.id, p.name
+          ORDER BY revenue DESC
+          LIMIT COALESCE(p_limit, 10);
+        $$;
+      ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="0001-09-2-fn-top-customers" author="dharani">
+        <sql splitStatements="false">
+            <![CDATA[
+        DROP FUNCTION IF EXISTS fn_top_customers(date, date, integer);
+        CREATE OR REPLACE FUNCTION fn_top_customers(
+          p_start DATE,
+          p_end   DATE,
+          p_limit INTEGER
+        )
+        RETURNS TABLE(
+          customer_id BIGINT,
+          name        TEXT,
+          orders      BIGINT,
+          revenue     NUMERIC
+        )
+        LANGUAGE sql
+        STABLE
+        AS $$
+          SELECT
+              c.id::bigint               AS customer_id,
+              c.name::text               AS name,
+              COUNT(o.id)::bigint        AS orders,
+              COALESCE(SUM(o.grand_total), 0)::numeric AS revenue
+          FROM orders o
+          JOIN customers c ON c.id = o.customer_id
+          WHERE o.order_date BETWEEN p_start AND p_end
+            AND o.status IN ('PAID')
+          GROUP BY c.id, c.name
+          ORDER BY revenue DESC
+          LIMIT COALESCE(p_limit, 10);
+        $$;
+      ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="0001-09-3-fn-top-categories" author="dharani">
+        <sql splitStatements="false">
+            <![CDATA[
+        DROP FUNCTION IF EXISTS fn_top_categories(date, date, integer);
+        CREATE OR REPLACE FUNCTION fn_top_categories(
+          p_start DATE,
+          p_end   DATE,
+          p_limit INTEGER
+        )
+        RETURNS TABLE(
+          category TEXT,
+          units    BIGINT,
+          revenue  NUMERIC
+        )
+        LANGUAGE sql
+        STABLE
+        AS $$
+          -- Derive category from SKU prefix until you add a real products.category column
+          SELECT
+              NULLIF(split_part(p.sku, '-', 1), '')::text AS category,
+              SUM(oi.quantity)::bigint                    AS units,
+              COALESCE(SUM(oi.line_total), 0)::numeric    AS revenue
+          FROM order_items oi
+          JOIN orders o   ON o.id = oi.order_id
+          JOIN products p ON p.id = oi.product_id
+          WHERE o.order_date BETWEEN p_start AND p_end
+            AND o.status IN ('PAID')
+            AND oi.currency = 'EUR'
+          GROUP BY 1
+          ORDER BY revenue DESC
+          LIMIT COALESCE(p_limit, 10);
+        $$;
+      ]]>
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

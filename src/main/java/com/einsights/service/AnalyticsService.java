@@ -124,12 +124,16 @@ public class AnalyticsService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<TopCategoryRow> getTopCategories(LocalDate start, LocalDate end, int limit) {
         requireValidRange(start, end);
         if (limit <= 0) limit = 10;
         tagSession("top-categories");
 
-        Query q = em.createNativeQuery("SELECT * FROM fn_top_categories(:start, :end, :limit)");
+        Query q = em.createNativeQuery("""
+        SELECT category, units, revenue
+        FROM fn_top_categories(:start, :end, :limit)
+    """);
         q.setParameter("start", Date.valueOf(start));
         q.setParameter("end", Date.valueOf(end));
         q.setParameter("limit", limit);
@@ -138,23 +142,34 @@ public class AnalyticsService {
         List<Object[]> rows = q.getResultList();
         List<TopCategoryRow> out = new ArrayList<>(rows.size());
         for (Object[] r : rows) {
-            TopCategoryRow row = new TopCategoryRow(
-                    ((Number) r[0]).longValue(),
-                    (String) r[1],
-                    ((Number) r[2]).longValue(),
-                    nz((BigDecimal) r[3])
-            );
-            out.add(row);
+            // r[0]=category (String), r[1]=units (Number), r[2]=revenue (BigDecimal/Number)
+            String category = (String) r[0];
+            long units = (r[1] == null) ? 0L : ((Number) r[1]).longValue();
+
+            BigDecimal revenue;
+            if (r[2] == null) {
+                revenue = BigDecimal.ZERO;
+            } else if (r[2] instanceof BigDecimal bd) {
+                revenue = bd;
+            } else {
+                revenue = new BigDecimal(r[2].toString());
+            }
+
+            out.add(new TopCategoryRow(category, units, revenue));
         }
         return out;
     }
 
+    @Transactional(readOnly = true)
     public List<TopCustomerRow> getTopCustomers(LocalDate start, LocalDate end, int limit) {
         requireValidRange(start, end);
         if (limit <= 0) limit = 10;
         tagSession("top-customers");
 
-        Query q = em.createNativeQuery("SELECT * FROM fn_top_customers(:start, :end, :limit)");
+        Query q = em.createNativeQuery("""
+        SELECT customer_id, name, orders, revenue
+        FROM fn_top_customers(:start, :end, :limit)
+    """);
         q.setParameter("start", Date.valueOf(start));
         q.setParameter("end", Date.valueOf(end));
         q.setParameter("limit", limit);
@@ -163,14 +178,21 @@ public class AnalyticsService {
         List<Object[]> rows = q.getResultList();
         List<TopCustomerRow> out = new ArrayList<>(rows.size());
         for (Object[] r : rows) {
-            TopCustomerRow row = new TopCustomerRow(
-                    ((Number) r[0]).longValue(),
-                    (String) r[1],
-                    ((Number) r[2]).longValue(),
-                    nz((BigDecimal) r[3]),
-                    r[4] == null ? null : String.valueOf(r[4]) // yyyy-MM-dd
-            );
-            out.add(row);
+            // r[0]=customer_id (Number), r[1]=name (String), r[2]=orders (Number), r[3]=revenue (BigDecimal/Number)
+            long customerId = ((Number) r[0]).longValue();
+            String name = (String) r[1];
+            long orders = ((Number) r[2]).longValue();
+
+            BigDecimal revenue;
+            if (r[3] == null) {
+                revenue = BigDecimal.ZERO;
+            } else if (r[3] instanceof BigDecimal bd) {
+                revenue = bd;
+            } else {
+                revenue = new BigDecimal(r[3].toString());
+            }
+
+            out.add(new TopCustomerRow(customerId, name, orders, revenue));
         }
         return out;
     }
