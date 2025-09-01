@@ -1,0 +1,2 @@
+.card { @apply rounded-2xl bg-white shadow-soft border border-neutral-100; }
+.card-dark { @apply rounded-2xl bg-neutral-900 text-neutral-100 shadow-soft border border-neutral-800; }
